@@ -1,5 +1,7 @@
 # Home Lab
 
+# Status: This has been replaced with https://github.com/clayshek/homelab-monorepo
+
 ## Overview
 
 This (WIP) page describes a home lab environment for evaluation and testing of various technologies. Basic provisioning & configuration of both supporting infrastructure and additional products is documented here - mostly so I remember how I did stuff. 
