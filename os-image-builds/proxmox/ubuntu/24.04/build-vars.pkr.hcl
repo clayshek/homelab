@@ -1,24 +1,56 @@
+variable "proxmox_node" {
+  default = "pve1"
+}
+variable "proxmox_fqdn_or_ip" {
+  default = "pve1.example.com"
+}
+variable "proxmox_user" {
+  default = "packer-build@pve!buildtoken" 
+}
+
+variable "proxmox_password" {
+  default = env("VAR_proxmox_password")
+  sensitive = true
+} 
+
+variable "proxmox_apitoken" {
+  default = env("VAR_proxmox_api_token")
+  sensitive = true
+} 
+
 variable "vm_name" {
-  default = "ubuntu-24-04-tpl"
+  default = "tpl-ubuntu-2404"
 }
 
 variable "iso_file" {
-  default = "pveshare:iso/ubuntu-24.04.2-live-server-amd64.iso"
+  default = "pveshare:iso/ubuntu-24.04.3-live-server-amd64.iso"
 }
 
 variable "iso_checksum" {
-  default = "d6dab0c3a657988501b4bd76f1297c053df710e06e0c3aece60dead24f270b4d"
-  # Ref: https://releases.ubuntu.com/noble/SHA256SUMS
+  default = "file:https://releases.ubuntu.com/noble/SHA256SUMS"
 }
 
-variable "ssh_username" {
-  default = "packer"
+variable "vm_username" {
+  default = "ubuntu"
 }
 
-variable "ssh_password" {
+variable "vm_password_hashed" {
+  default = "$6$.xWrYI1ZS0Xxsaz8$aFXrjsvX74D8LI2uIkqqlH9NqV6XYLeU1X/fnDJgV1xLOs2tOF7iLwAu.6TqzI3hwTaMXezPM1jmK0nBTPhkH0"
+}
+
+variable "vm_password" {
   default = "packer-password"
 }
 
 variable "storage_pool" {
-  default = "pveshare"
+  default = "vm-store"
+}
+
+# Render cloud-init user-data from template
+locals {
+  rendered_user_data = templatefile("./config/user-data.pkrtpl.hcl", {
+    vm_name     = var.vm_name
+    vm_username = var.vm_username
+    vm_password_hashed = var.vm_password_hashed
+  })
 }
