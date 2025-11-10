@@ -1,12 +1,13 @@
-# ubuntu-24-04.pkr.hcl
+# windows-server-2025.pkr.hcl
 
-# Render cloud-init user-data file from template
+/*
 source "file" "generate-user-data" {
     content = local.rendered_user_data
     target = "ubuntu/24.04/config/user-data"
   }
+*/
 
-source "proxmox-iso" "ubuntu" {
+source "proxmox-iso" "windows" {
   # Proxmox Data:
   proxmox_url      = "https://${var.proxmox_fqdn_or_ip}:8006/api2/json"
   node             = var.proxmox_node
@@ -17,13 +18,13 @@ source "proxmox-iso" "ubuntu" {
   vm_name          = var.vm_name
   template_name    = var.vm_name
   # cloud_init = true to add an empty cloud-init drive to the template
-  cloud_init       = true
-  cloud_init_storage_pool = var.storage_pool
+  #cloud_init       = true
+  #cloud_init_storage_pool = var.storage_pool
   boot_iso {
     type           = "scsi"
     iso_file       = var.iso_file
     unmount        = true
-    iso_checksum   = var.iso_checksum
+    #iso_checksum   = var.iso_checksum
   }
   disks {
     storage_pool   = var.storage_pool
@@ -41,6 +42,7 @@ source "proxmox-iso" "ubuntu" {
     bridge = "vmbr0"
   }
   insecure_skip_tls_verify = true
+  /*
   http_directory   = "ubuntu/24.04/config"
   boot_wait    = "10s"
 
@@ -54,32 +56,15 @@ source "proxmox-iso" "ubuntu" {
     "boot",
     "<enter>"
   ]  
+  */
 }
 
+/*
 build {
   sources = ["source.file.generate-user-data"]
 }
+*/
 
 build {
-  sources = ["source.proxmox-iso.ubuntu"]
-
-  provisioner "shell" {
-    inline = [
-      #"echo '${var.vm_username} ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
-      "echo '${var.vm_password}' | sudo -S apt-get -y update",
-      "echo '${var.vm_password}' | sudo -S apt-get install -y qemu-guest-agent",
-      "echo '[*] Cleaning cloud-init state'",
-      "echo '${var.vm_password}' | sudo -S cloud-init clean --logs --seed",
-      "echo '[*] Resetting machine-id'",
-      "echo '${var.vm_password}' | sudo -S rm -f /etc/machine-id",
-      "echo '${var.vm_password}' | sudo -S touch /etc/machine-id",
-    ]
-  }
-
-  post-processor "shell-local" {
-    inline = [
-      "rm -f ubuntu/24.04/config/user-data",
-      "echo '[*] Cleaned up local cloud-init user-data file.'"
-    ]
-  }
+  sources = ["source.proxmox-iso.windows"]
 }
